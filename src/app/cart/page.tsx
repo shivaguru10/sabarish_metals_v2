@@ -73,7 +73,7 @@ export default function CartPage() {
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   {/* Image */}
-                  <Link href={"/products/" + item.slug} className="flex-shrink-0">
+                  <Link href={"/products/" + item.slug} className="shrink-0">
                     {item.image ? (
                       <img
                         src={item.image}

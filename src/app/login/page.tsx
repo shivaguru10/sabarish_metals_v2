@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
+import { useSettings } from "@/lib/settings-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { settings } = useSettings();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -107,9 +109,11 @@ export default function LoginPage() {
             {/* Header */}
             <div className="text-center mb-8">
               <Link href="/" className="inline-block mb-6">
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-amber-600 bg-clip-text text-transparent">
-                  Sabarish Metals
-                </span>
+                <img 
+                  src="/logo.png" 
+                  alt={settings.siteName} 
+                  className="h-20 w-auto object-contain mx-auto"
+                />
               </Link>
               <h1 className="text-2xl font-bold">
                 {isLogin ? "Welcome Back" : "Create Account"}

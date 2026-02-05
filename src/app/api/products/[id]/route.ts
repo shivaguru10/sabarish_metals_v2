@@ -9,19 +9,21 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get("admin") === "true";
     
     // Find by ID or slug
     const product = await db.product.findFirst({
       where: {
         OR: [{ id }, { slug: id }],
-        isActive: true,
+        ...(includeInactive ? {} : { isActive: true }),
       },
       include: {
         category: {
           select: { id: true, name: true, slug: true },
         },
         reviews: {
-          where: { isApproved: true },
+          where: { isVisible: true },
           include: {
             user: {
               select: { name: true },

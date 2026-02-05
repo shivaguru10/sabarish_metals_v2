@@ -15,11 +15,15 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
+    const admin = searchParams.get("admin");
 
     // Build where clause
-    const where: any = {
-      isActive: true,
-    };
+    const where: any = {};
+    
+    // Only filter by isActive for non-admin requests
+    if (admin !== "true") {
+      where.isActive = true;
+    }
 
     if (category) {
       where.category = { slug: category };
@@ -134,25 +138,16 @@ export async function POST(request: NextRequest) {
         name,
         slug,
         description,
-        categoryId,
+        category: categoryId ? { connect: { id: categoryId } } : undefined,
         image,
         images,
         price,
         comparePrice,
-        costPrice,
-        hsnCode,
-        gstRate,
         sku,
         stock,
-        lowStockThreshold,
         specifications,
         isFeatured,
-        weight,
-        length,
-        width,
-        height,
-        metaTitle: metaTitle || name,
-        metaDescription: metaDescription || (description ? description.substring(0, 160) : null),
+        isActive: true,
       },
       include: {
         category: true,

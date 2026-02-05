@@ -73,7 +73,11 @@ export default function ProductPage() {
           return;
         }
         const data = await res.json();
-        setProduct(data);
+        if (data.success && data.data) {
+          setProduct(data.data);
+        } else {
+          setProduct(null);
+        }
       } catch (error) {
         console.error("Failed to fetch product:", error);
       } finally {
@@ -116,8 +120,9 @@ export default function ProductPage() {
 
   const discount = product.comparePrice ? calculateDiscount(product.price, product.comparePrice) : 0;
   const allImages = [product.image, ...(product.images || [])].filter(Boolean);
-  const avgRating = product.reviews.length > 0
-    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+  const reviews = product.reviews || [];
+  const avgRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : 0;
 
   const handleAddToCart = () => {
@@ -181,7 +186,7 @@ export default function ProductPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-muted-foreground/30">
-                {product.name[0]}
+                {product.name?.[0] || "P"}
               </div>
             )}
           </div>
@@ -193,7 +198,7 @@ export default function ProductPage() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
                     selectedImage === idx ? "border-primary" : "border-transparent"
                   }`}
                 >
@@ -220,7 +225,7 @@ export default function ProductPage() {
           <h1 className="text-3xl font-bold">{product.name}</h1>
 
           {/* Rating */}
-          {product._count.reviews > 0 && (
+          {(product._count?.reviews || 0) > 0 && (
             <div className="flex items-center gap-2">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -235,7 +240,7 @@ export default function ProductPage() {
                 ))}
               </div>
               <span className="text-muted-foreground">
-                ({product._count.reviews} reviews)
+                ({product._count?.reviews || 0} reviews)
               </span>
             </div>
           )}
@@ -344,7 +349,7 @@ export default function ProductPage() {
           {[
             { id: "description", label: "Description" },
             { id: "specifications", label: "Specifications" },
-            { id: "reviews", label: `Reviews (${product._count.reviews})` },
+            { id: "reviews", label: `Reviews (${product._count?.reviews || 0})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -392,8 +397,8 @@ export default function ProductPage() {
 
           {activeTab === "reviews" && (
             <div className="space-y-6">
-              {product.reviews.length > 0 ? (
-                product.reviews.map((review) => (
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
                   <Card key={review.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
