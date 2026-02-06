@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -102,9 +102,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-md mx-auto">
-        <Card>
+    <div className="min-h-screen bg-background">
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.back()}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto">
+          <Card>
           <CardContent className="p-8">
             {/* Header */}
             <div className="text-center mb-8">
@@ -272,6 +286,7 @@ export default function LoginPage() {
                   setIsLogin(!isLogin);
                   setError("");
                   setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="text-primary font-medium hover:underline"
               >
@@ -280,6 +295,7 @@ export default function LoginPage() {
             </p>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
