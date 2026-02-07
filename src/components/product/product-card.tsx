@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,36 +77,14 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name[0]}
             </div>
           )}
-          
-          {/* Discount badge */}
-          {discount > 0 && (
-            <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs font-medium px-2 py-1 rounded">
-              {discount}% OFF
-            </span>
-          )}
 
           {/* Wishlist button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+          <button
             onClick={handleWishlistToggle}
+            className="absolute top-3 right-3 h-8 w-8 rounded-full backdrop-blur-md bg-black/20 hover:bg-black/40 flex items-center justify-center transition-all duration-200 hover:scale-110"
           >
-            <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : ""}`} />
-          </Button>
-
-          {/* Quick add to cart */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              className="w-full" 
-              size="sm"
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-            </Button>
-          </div>
+            <Heart className={`h-4 w-4 ${inWishlist ? "fill-red-500 text-red-500" : "text-white"}`} />
+          </button>
         </div>
 
         <CardContent className="p-4">
@@ -121,14 +98,32 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           
-          {/* Price */}
-          <div className="mt-2 flex items-center gap-2">
-            <span className="font-bold text-primary">{formatPrice(product.price)}</span>
-            {product.comparePrice && product.comparePrice > product.price && (
-              <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.comparePrice)}
-              </span>
-            )}
+          {/* Price and Cart Button Row */}
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-primary">{formatPrice(product.price)}</span>
+              {product.comparePrice && product.comparePrice > product.price && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {formatPrice(product.comparePrice)}
+                </span>
+              )}
+              {discount > 0 && (
+                <span className="bg-destructive/10 text-destructive text-xs font-semibold px-1.5 py-0.5 rounded">
+                  {discount}% off
+                </span>
+              )}
+            </div>
+            
+            {/* Add to Cart Icon Button */}
+            <Button 
+              size="icon"
+              variant={product.stock === 0 ? "outline" : "default"}
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="shrink-0 h-8 w-8"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Stock status */}

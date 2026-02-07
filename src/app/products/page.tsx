@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { ProductCard } from "@/components/product/product-card";
+import { ProductFilters } from "@/components/product/product-filters";
 import { Suspense } from "react";
+import { Package } from "lucide-react";
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -8,6 +10,9 @@ interface ProductsPageProps {
     search?: string;
     sort?: string;
     page?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    inStock?: string;
   }>;
 }
 
@@ -16,8 +21,11 @@ async function getProducts(params: {
   search?: string;
   sort?: string;
   page?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  inStock?: string;
 }) {
-  const { category, search, sort, page = "1" } = params;
+  const { category, search, sort, page = "1", minPrice, maxPrice, inStock } = params;
   const limit = 12;
   const skip = (parseInt(page) - 1) * limit;
 
@@ -32,6 +40,18 @@ async function getProducts(params: {
       { name: { contains: search, mode: "insensitive" } },
       { description: { contains: search, mode: "insensitive" } },
     ];
+  }
+
+  // Price range filter
+  if (minPrice || maxPrice) {
+    where.price = {};
+    if (minPrice) where.price.gte = parseFloat(minPrice);
+    if (maxPrice) where.price.lte = parseFloat(maxPrice);
+  }
+
+  // In stock filter
+  if (inStock === "true") {
+    where.stock = { gt: 0 };
   }
 
   let orderBy: any = { createdAt: "desc" };
@@ -60,14 +80,32 @@ async function getCategories() {
   });
 }
 
+async function getTotalProductCount() {
+  return db.product.count({ where: { isActive: true } });
+}
+
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
-  const [{ products, total, totalPages }, categories] = await Promise.all([
+  const [{ products, total, totalPages }, categories, totalProductCount] = await Promise.all([
     getProducts(params),
     getCategories(),
+    getTotalProductCount(),
   ]);
 
   const currentPage = parseInt(params.page || "1");
+
+  // Create URL for pagination that preserves current filters
+  const createPageUrl = (page: number) => {
+    const urlParams = new URLSearchParams();
+    if (params.category) urlParams.set("category", params.category);
+    if (params.search) urlParams.set("search", params.search);
+    if (params.sort) urlParams.set("sort", params.sort);
+    if (params.minPrice) urlParams.set("minPrice", params.minPrice);
+    if (params.maxPrice) urlParams.set("maxPrice", params.maxPrice);
+    if (params.inStock) urlParams.set("inStock", params.inStock);
+    urlParams.set("page", String(page));
+    return `/products?${urlParams.toString()}`;
+  };
 
   return (
     <div className="container py-8">
@@ -81,72 +119,50 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 shrink-0">
-          <div className="sticky top-20 space-y-6">
-            {/* Categories */}
-            <div>
-              <h3 className="font-semibold mb-3">Categories</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/products"
-                    className={`text-sm hover:text-primary ${!params.category ? "text-primary font-medium" : "text-muted-foreground"}`}
-                  >
-                    All Products
-                  </a>
-                </li>
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <a
-                      href={"/products?category=" + cat.slug}
-                      className={`text-sm hover:text-primary ${params.category === cat.slug ? "text-primary font-medium" : "text-muted-foreground"}`}
-                    >
-                      {cat.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Sort */}
-            <div>
-              <h3 className="font-semibold mb-3">Sort By</h3>
-              <ul className="space-y-2">
-                {[
-                  { value: "", label: "Newest" },
-                  { value: "price-asc", label: "Price: Low to High" },
-                  { value: "price-desc", label: "Price: High to Low" },
-                  { value: "name", label: "Name: A to Z" },
-                ].map((option) => (
-                  <li key={option.value}>
-                    <a
-                      href={"/products?" + new URLSearchParams({ ...params, sort: option.value }).toString()}
-                      className={`text-sm hover:text-primary ${(params.sort || "") === option.value ? "text-primary font-medium" : "text-muted-foreground"}`}
-                    >
-                      {option.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </aside>
+        <Suspense fallback={<div className="w-72 h-96 bg-secondary/20 animate-pulse rounded-xl" />}>
+          <ProductFilters 
+            categories={categories} 
+            totalProducts={totalProductCount}
+          />
+        </Suspense>
 
         {/* Products Grid */}
         <div className="flex-1">
-          {/* Results count */}
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {products.length} of {total} products
-            </p>
+          {/* Results count & current filters summary */}
+          <div className="mb-6 flex items-center justify-between bg-secondary/30 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm">
+                <span className="font-medium">{total}</span>
+                <span className="text-muted-foreground"> products found</span>
+                {products.length !== total && (
+                  <span className="text-muted-foreground"> (showing {products.length})</span>
+                )}
+              </p>
+            </div>
+            {totalPages > 1 && (
+              <p className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </p>
+            )}
           </div>
 
           {products.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No products found</p>
+            <div className="text-center py-16 bg-secondary/20 rounded-xl">
+              <Package className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="font-medium mb-2">No products found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Try adjusting your filters or search terms
+              </p>
+              <a 
+                href="/products"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
+                Clear all filters
+              </a>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -155,26 +171,68 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-8 flex justify-center gap-2">
-              {currentPage > 1 && (
-                <a
-                  href={"/products?" + new URLSearchParams({ ...params, page: String(currentPage - 1) }).toString()}
-                  className="px-4 py-2 border rounded-md hover:bg-secondary"
-                >
-                  Previous
-                </a>
-              )}
-              <span className="px-4 py-2">
-                Page {currentPage} of {totalPages}
-              </span>
-              {currentPage < totalPages && (
-                <a
-                  href={"/products?" + new URLSearchParams({ ...params, page: String(currentPage + 1) }).toString()}
-                  className="px-4 py-2 border rounded-md hover:bg-secondary"
-                >
-                  Next
-                </a>
-              )}
+            <div className="mt-8 flex justify-center">
+              <nav className="flex items-center gap-1">
+                {/* Previous */}
+                {currentPage > 1 ? (
+                  <a
+                    href={createPageUrl(currentPage - 1)}
+                    className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border hover:bg-secondary transition-colors text-sm font-medium"
+                  >
+                    Previous
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border text-muted-foreground/50 cursor-not-allowed text-sm">
+                    Previous
+                  </span>
+                )}
+                
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1 mx-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      // Show first page, last page, current page, and pages around current
+                      if (page === 1 || page === totalPages) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
+                      return false;
+                    })
+                    .map((page, index, array) => {
+                      // Add ellipsis if there's a gap
+                      const showEllipsisBefore = index > 0 && page - array[index - 1] > 1;
+                      return (
+                        <span key={page} className="flex items-center">
+                          {showEllipsisBefore && (
+                            <span className="px-2 text-muted-foreground">...</span>
+                          )}
+                          <a
+                            href={createPageUrl(page)}
+                            className={`inline-flex items-center justify-center h-10 w-10 rounded-md text-sm font-medium transition-colors ${
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground"
+                                : "border border-border hover:bg-secondary"
+                            }`}
+                          >
+                            {page}
+                          </a>
+                        </span>
+                      );
+                    })}
+                </div>
+
+                {/* Next */}
+                {currentPage < totalPages ? (
+                  <a
+                    href={createPageUrl(currentPage + 1)}
+                    className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border hover:bg-secondary transition-colors text-sm font-medium"
+                  >
+                    Next
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border text-muted-foreground/50 cursor-not-allowed text-sm">
+                    Next
+                  </span>
+                )}
+              </nav>
             </div>
           )}
         </div>
