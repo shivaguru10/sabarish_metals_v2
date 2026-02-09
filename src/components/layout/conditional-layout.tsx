@@ -19,6 +19,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
     <>
       <Header />
       <main className="flex-1">{children}</main>
+      <div className="border-t border-border" />
       <Footer />
     </>
   );

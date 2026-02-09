@@ -26,6 +26,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   
   const cartItems = useCartStore((state) => state.getTotalItems());
@@ -45,6 +46,22 @@ export function Header() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Hide header when footer is visible
+  useEffect(() => {
+    const footer = document.getElementById("site-footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      { root: null, threshold: 0.1 }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
   }, []);
 
   const navigation = [
@@ -70,7 +87,11 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <header
+      className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 transition-transform duration-300 ${
+        isFooterVisible ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+      }`}
+    >
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
