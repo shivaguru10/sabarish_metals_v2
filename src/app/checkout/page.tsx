@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { 
-  ChevronRight, 
-  MapPin, 
-  CreditCard, 
-  Truck, 
+import {
+  ChevronRight,
+  MapPin,
+  CreditCard,
+  Truck,
   Shield,
   Loader2,
-  ArrowLeft 
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
-  
+
   const [address, setAddress] = useState({
     name: "",
     phone: "",
@@ -87,7 +87,7 @@ export default function CheckoutPage() {
 
   const handlePayment = async () => {
     setLoading(true);
-    
+
     try {
       // Create order
       const orderRes = await fetch("/api/orders", {
@@ -118,7 +118,7 @@ export default function CheckoutPage() {
       alert("Payment integration coming soon! Order created successfully.");
       clearCart();
       router.push("/orders/" + order.id);
-      
+
     } catch (error) {
       console.error("Payment error:", error);
       alert("Payment failed. Please try again.");
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
         <Link href="/" className="hover:text-primary">Home</Link>
         <ChevronRight className="h-4 w-4" />
         <Link href="/cart" className="hover:text-primary">Cart</Link>
@@ -138,30 +138,39 @@ export default function CheckoutPage() {
         <span className="text-foreground">Checkout</span>
       </nav>
 
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+      <div className="flex flex-col md:flex-row items-center justify-start gap-20 mb-12">
+        <h1 className="text-3xl font-bold">Checkout</h1>
 
-      {/* Progress Steps */}
-      <div className="flex items-center justify-center mb-12">
-        {[
-          { num: 1, label: "Address", icon: MapPin },
-          { num: 2, label: "Payment", icon: CreditCard },
-        ].map((s, idx) => (
-          <div key={s.num} className="flex items-center">
-            <div className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                step >= s.num ? "bg-primary text-primary-foreground" : "bg-secondary"
+        {/* Progress Steps */}
+        <div className="flex items-center">
+          {/* Step 1: Address */}
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-300 shadow-sm ${step >= 1 ? "bg-primary text-primary-foreground scale-100" : "bg-secondary text-muted-foreground"
               }`}>
-                <s.icon className="h-5 w-5" />
-              </div>
-              <span className={`ml-2 font-medium ${step >= s.num ? "text-foreground" : "text-muted-foreground"}`}>
-                {s.label}
-              </span>
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            {idx < 1 && (
-              <div className={`w-24 h-1 mx-4 ${step > 1 ? "bg-primary" : "bg-secondary"}`} />
-            )}
+            <span className={`text-sm sm:text-base font-bold ${step >= 1 ? "text-foreground" : "text-muted-foreground"}`}>
+              Address
+            </span>
           </div>
-        ))}
+
+          {/* Connector Line */}
+          <div className="flex items-center px-4">
+            <div className={`h-[2px] w-12 sm:w-16 transition-colors duration-300 ${step > 1 ? "bg-primary" : "bg-gray-300"}`}></div>
+            <ChevronRight className={`h-4 w-4 -ml-1 ${step > 1 ? "text-primary" : "text-gray-300"}`} />
+          </div>
+
+          {/* Step 2: Payment */}
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-300 shadow-sm ${step >= 2 ? "bg-primary text-primary-foreground scale-100" : "bg-secondary text-muted-foreground scale-95"
+              }`}>
+              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <span className={`text-sm sm:text-base font-bold ${step >= 2 ? "text-foreground" : "text-muted-foreground"}`}>
+              Payment
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -180,6 +189,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setAddress({ ...address, name: e.target.value })}
                         placeholder="Enter full name"
                         required
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                     <div>
@@ -187,10 +197,21 @@ export default function CheckoutPage() {
                       <Input
                         type="tel"
                         value={address.phone}
-                        onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                        placeholder="Enter phone number"
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setAddress({ ...address, phone: value });
+                          }
+                        }}
+                        placeholder="Enter 10-digit mobile number"
                         required
+                        pattern="[0-9]{10}"
+                        maxLength={10}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
+                      {address.phone.length > 0 && address.phone.length < 10 && (
+                        <p className="text-xs text-destructive mt-1">Must be 10 digits</p>
+                      )}
                     </div>
                   </div>
 
@@ -199,19 +220,64 @@ export default function CheckoutPage() {
                     <Input
                       value={address.street}
                       onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                      placeholder="Enter street address"
+                      placeholder="Enter street address, house no, building"
                       required
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">City</label>
+                      <label className="text-sm font-medium mb-2 block">Pincode</label>
+                      <div className="relative">
+                        <Input
+                          value={address.pincode}
+                          onChange={async (e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            if (value.length <= 6) {
+                              setAddress(prev => ({ ...prev, pincode: value }));
+
+                              // Auto-fetch city/state when 6 digits entered
+                              if (value.length === 6) {
+                                try {
+                                  // Simple visual feedback before fetch
+                                  const res = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+                                  const data = await res.json();
+
+                                  if (data?.[0]?.Status === "Success" && data?.[0]?.PostOffice?.length > 0) {
+                                    const postOffice = data[0].PostOffice[0];
+                                    setAddress(prev => ({
+                                      ...prev,
+                                      pincode: value,
+                                      city: postOffice.District,
+                                      state: postOffice.State
+                                    }));
+                                  }
+                                } catch (error) {
+                                  console.error("Failed to fetch pincode details", error);
+                                }
+                              }
+                            }
+                          }}
+                          placeholder="Enter 6-digit pincode"
+                          required
+                          pattern="[0-9]{6}"
+                          maxLength={6}
+                          className="transition-all focus:ring-2 focus:ring-primary/20 pr-10"
+                        />
+                        {address.pincode.length === 6 && !address.city && (
+                          <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">City / District</label>
                       <Input
                         value={address.city}
                         onChange={(e) => setAddress({ ...address, city: e.target.value })}
                         placeholder="Enter city"
                         required
+                        className="transition-all focus:ring-2 focus:ring-primary/20 bg-muted/50"
                       />
                     </div>
                     <div>
@@ -221,40 +287,44 @@ export default function CheckoutPage() {
                         onChange={(e) => setAddress({ ...address, state: e.target.value })}
                         placeholder="Enter state"
                         required
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Pincode</label>
-                      <Input
-                        value={address.pincode}
-                        onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
-                        placeholder="Enter pincode"
-                        required
+                        className="transition-all focus:ring-2 focus:ring-primary/20 bg-muted/50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Address Type</label>
-                    <div className="flex gap-4">
+                    <label className="text-sm font-medium mb-3 block">Address Type</label>
+                    <div className="flex flex-wrap gap-4">
                       {["home", "work", "other"].map((type) => (
-                        <label key={type} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="addressType"
-                            value={type}
-                            checked={address.type === type}
-                            onChange={(e) => setAddress({ ...address, type: e.target.value })}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <span className="capitalize">{type}</span>
-                        </label>
+                        <div
+                          key={type}
+                          onClick={() => setAddress({ ...address, type: type })}
+                          className={`flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer transition-all duration-200 group ${address.type === type
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-input hover:border-primary/50 hover:bg-muted/50"
+                            }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${address.type === type
+                            ? "border-primary bg-primary"
+                            : "border-muted-foreground group-hover:border-primary"
+                            }`}>
+                            {address.type === type && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <span className="capitalize text-sm font-medium hover:text-primary transition-colors">{type}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
+                    size="lg"
+                  >
                     Continue to Payment
+                    <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </form>
               </CardContent>
@@ -266,8 +336,13 @@ export default function CheckoutPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold">Payment</h2>
-                  <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setStep(1)}
+                    className="cursor-pointer group hover:bg-transparent hover:text-primary transition-colors pl-0"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
                     Back to Address
                   </Button>
                 </div>
@@ -307,9 +382,9 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                <Button 
-                  onClick={handlePayment} 
-                  className="w-full" 
+                <Button
+                  onClick={handlePayment}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
                   size="lg"
                   disabled={loading}
                 >
@@ -319,7 +394,11 @@ export default function CheckoutPage() {
                       Processing...
                     </>
                   ) : (
-                    <>Pay {formatPrice(total)}</>
+                    <>
+                      Place Order Now
+                      <span className="ml-1 opacity-90">({formatPrice(total)})</span>
+                      <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </>
                   )}
                 </Button>
 
@@ -337,14 +416,14 @@ export default function CheckoutPage() {
           <Card className="sticky top-24">
             <CardContent className="p-6">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              
+
               {/* Items */}
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
                 {items.map((item) => (
                   <div key={item.productId} className="flex gap-3">
                     {item.image ? (
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />

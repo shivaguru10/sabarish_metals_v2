@@ -59,8 +59,12 @@ export default function CartPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Shopping Cart</h1>
-        <Button variant="ghost" onClick={clearCart} className="text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4 mr-2" />
+        <Button
+          variant="ghost"
+          onClick={clearCart}
+          className="cursor-pointer text-muted-foreground hover:text-red-500 hover:bg-transparent transition-all duration-200 hover:scale-105 active:scale-95 group"
+        >
+          <Trash2 className="h-4 w-4 mr-2 transition-transform group-hover:rotate-12" />
           Clear Cart
         </Button>
       </div>
@@ -89,50 +93,50 @@ export default function CartPage() {
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <Link 
+                    <Link
                       href={"/products/" + item.slug}
                       className="font-medium hover:text-primary transition-colors line-clamp-2"
                     >
                       {item.name}
                     </Link>
-                    
+
                     <p className="text-lg font-bold text-primary mt-1">
                       {formatPrice(item.price)}
                     </p>
 
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-4 mt-3">
-                      <div className="flex items-center border rounded-lg">
-                        <Button 
-                          variant="ghost" 
+                      <div className="flex items-center border rounded-lg overflow-hidden">
+                        <Button
+                          variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 rounded-none cursor-pointer hover:bg-transparent hover:text-destructive transition-all duration-200 hover:scale-110 active:scale-90"
                           onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                         >
-                          <Minus className="h-3 w-3" />
+                          <Minus className="h-3.5 w-3.5" />
                         </Button>
-                        <span className="w-10 text-center text-sm font-medium">
+                        <span className="w-10 text-center text-sm font-medium tabular-nums">
                           {item.quantity}
                         </span>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 rounded-none cursor-pointer hover:bg-transparent hover:text-primary transition-all duration-200 hover:scale-110 active:scale-90"
                           onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                           disabled={item.quantity >= item.stock}
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-3.5 w-3.5" />
                         </Button>
                       </div>
 
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => removeItem(item.productId)}
-                        className="text-destructive hover:text-destructive"
+                        className="cursor-pointer text-muted-foreground hover:text-red-500 hover:bg-transparent transition-all duration-200 hover:scale-105 active:scale-95 group"
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
+                        <Trash2 className="h-4 w-4 mr-1 transition-transform group-hover:rotate-12" />
                         Remove
                       </Button>
                     </div>
@@ -158,7 +162,7 @@ export default function CartPage() {
           <Card className="sticky top-24">
             <CardContent className="p-6">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal ({getTotalItems()} items)</span>
@@ -195,9 +199,12 @@ export default function CartPage() {
               </div>
 
               <Link href="/checkout">
-                <Button className="w-full" size="lg">
+                <Button
+                  className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
+                  size="lg"
+                >
                   Proceed to Checkout
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
 

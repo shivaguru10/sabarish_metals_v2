@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Trash2, ShoppingCart, Heart } from "lucide-react";
+import { Trash2, ShoppingCart, Heart, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
@@ -34,6 +34,7 @@ export default function WishlistPage() {
 
   const handleAddToCart = (item: typeof items[0]) => {
     addToCart({
+      id: item.id,
       productId: item.productId,
       name: item.name,
       slug: item.slug,
@@ -46,16 +47,25 @@ export default function WishlistPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-md mx-auto">
-          <Heart className="h-24 w-24 mx-auto text-muted-foreground/50 mb-6" />
-          <h1 className="text-2xl font-bold mb-4">Your Wishlist is Empty</h1>
-          <p className="text-muted-foreground mb-8">
-            Save items you love by clicking the heart icon on any product. They&apos;ll appear here!
-          </p>
-          <Link href="/products">
-            <Button size="lg">Browse Products</Button>
-          </Link>
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+          <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="text-foreground">Wishlist</span>
+        </nav>
+
+        <div className="min-h-screen flex items-center justify-center pb-20">
+          <div className="max-w-md mx-auto text-center">
+            <Heart className="h-24 w-24 mx-auto text-muted-foreground/50 mb-6" />
+            <h1 className="text-2xl font-bold mb-4">Your Wishlist is Empty</h1>
+            <p className="text-muted-foreground mb-8">
+              Save items you love by clicking the heart icon on any product. They&apos;ll appear here!
+            </p>
+            <Link href="/products">
+              <Button size="lg">Browse Products</Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -63,14 +73,21 @@ export default function WishlistPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+        <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="text-foreground">Wishlist</span>
+      </nav>
+
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">My Wishlist ({items.length})</h1>
-        <Button 
-          variant="ghost" 
-          onClick={clearWishlist} 
-          className="text-destructive hover:text-destructive"
+        <Button
+          variant="ghost"
+          onClick={clearWishlist}
+          className="cursor-pointer text-muted-foreground hover:text-red-500 hover:bg-transparent transition-all duration-200 hover:scale-105 active:scale-95 group"
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 className="h-4 w-4 mr-2 transition-transform group-hover:rotate-12" />
           Clear All
         </Button>
       </div>
@@ -91,7 +108,7 @@ export default function WishlistPage() {
                     {item.name[0]}
                   </div>
                 )}
-                
+
                 {/* Remove button */}
                 <Button
                   variant="ghost"
@@ -113,7 +130,7 @@ export default function WishlistPage() {
                   {item.name}
                 </h3>
               </Link>
-              
+
               <p className="font-bold text-primary mt-2">{formatPrice(item.price)}</p>
 
               {/* Stock status */}
@@ -123,8 +140,8 @@ export default function WishlistPage() {
                 <p className="text-xs text-destructive mt-1">Out of Stock</p>
               )}
 
-              <Button 
-                className="w-full mt-3" 
+              <Button
+                className="w-full mt-3"
                 size="sm"
                 onClick={() => handleAddToCart(item)}
                 disabled={item.stock === 0}
