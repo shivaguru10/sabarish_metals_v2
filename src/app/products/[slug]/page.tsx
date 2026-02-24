@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
-import { 
-  ChevronRight, 
-  Heart, 
-  ShoppingCart, 
-  Minus, 
-  Plus, 
+import {
+  ChevronRight,
+  Heart,
+  ShoppingCart,
+  Minus,
+  Plus,
   Share2,
   Truck,
   Shield,
@@ -53,7 +53,7 @@ interface Product {
 export default function ProductPage() {
   const params = useParams();
   const slug = params.slug as string;
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -203,6 +203,7 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addToCart({
+        id: product.id,
         productId: product.id,
         name: product.name,
         slug: product.slug,
@@ -265,7 +266,7 @@ export default function ProductPage() {
               </div>
             )}
           </div>
-          
+
           {/* Thumbnails */}
           {allImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
@@ -273,9 +274,8 @@ export default function ProductPage() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === idx ? "border-primary" : "border-transparent"
-                  }`}
+                  className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === idx ? "border-primary" : "border-transparent"
+                    }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -288,7 +288,7 @@ export default function ProductPage() {
         <div className="space-y-6">
           {/* Category */}
           {product.category && (
-            <Link 
+            <Link
               href={"/products?category=" + product.category.slug}
               className="text-sm text-primary hover:underline"
             >
@@ -306,11 +306,10 @@ export default function ProductPage() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`h-5 w-5 ${
-                      star <= avgRating 
-                        ? "fill-yellow-400 text-yellow-400" 
+                    className={`h-5 w-5 ${star <= avgRating
+                        ? "fill-yellow-400 text-yellow-400"
                         : "text-muted-foreground"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -355,8 +354,8 @@ export default function ProductPage() {
           {/* Quantity & Add to Cart */}
           <div className="flex items-center gap-4">
             <div className="flex items-center border rounded-lg">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
@@ -364,8 +363,8 @@ export default function ProductPage() {
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="w-12 text-center font-medium">{quantity}</span>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
                 onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                 disabled={quantity >= product.stock}
@@ -374,8 +373,8 @@ export default function ProductPage() {
               </Button>
             </div>
 
-            <Button 
-              className="flex-1" 
+            <Button
+              className="flex-1"
               size="lg"
               onClick={handleAddToCart}
               disabled={product.stock === 0}
@@ -384,8 +383,8 @@ export default function ProductPage() {
               Add to Cart
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="icon"
               onClick={handleWishlistToggle}
             >
@@ -429,11 +428,10 @@ export default function ProductPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
+              className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === tab.id
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -487,11 +485,10 @@ export default function ProductPage() {
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                   key={star}
-                                  className={`h-4 w-4 ${
-                                    star <= review.rating 
-                                      ? "fill-yellow-400 text-yellow-400" 
+                                  className={`h-4 w-4 ${star <= review.rating
+                                      ? "fill-yellow-400 text-yellow-400"
                                       : "text-muted-foreground"
-                                  }`}
+                                    }`}
                                 />
                               ))}
                             </div>

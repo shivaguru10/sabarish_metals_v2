@@ -11,7 +11,7 @@ interface Product {
   id: string;
   name: string;
   slug: string;
-  image: string;
+  image: string | null;
   price: number;
   comparePrice: number | null;
   stock: number;
@@ -35,10 +35,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     addToCart({
+      id: product.id,
       productId: product.id,
       name: product.name,
       slug: product.slug,
-      image: product.image,
+      image: product.image || "",
       price: product.price,
       stock: product.stock,
     });
@@ -54,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
         productId: product.id,
         name: product.name,
         slug: product.slug,
-        image: product.image,
+        image: product.image || "",
         price: product.price,
         stock: product.stock,
       });

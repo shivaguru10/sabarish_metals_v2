@@ -38,7 +38,7 @@ export default function WishlistPage() {
       productId: item.productId,
       name: item.name,
       slug: item.slug,
-      image: item.image,
+      image: item.image || "",
       price: item.price,
       stock: item.stock,
     });
@@ -99,7 +99,7 @@ export default function WishlistPage() {
               <div className="aspect-square bg-secondary relative overflow-hidden">
                 {item.image ? (
                   <img
-                    src={item.image}
+                    src={item.image || ""}
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
