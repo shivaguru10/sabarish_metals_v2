@@ -1,4 +1,4 @@
-npimport { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -453,16 +453,16 @@ async function main() {
   // Delete related records first (foreign key constraints)
   console.log("   Deleting order items...");
   await prisma.orderItem.deleteMany({});
-  
+
   console.log("   Deleting cart items...");
   await prisma.cartItem.deleteMany({});
-  
+
   console.log("   Deleting wishlist items...");
   await prisma.wishlistItem.deleteMany({});
-  
+
   console.log("   Deleting reviews...");
   await prisma.review.deleteMany({});
-  
+
   console.log("   Deleting orders...");
   await prisma.order.deleteMany({});
 
